@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
     <title>Fantasías Infinitas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -20,6 +20,11 @@
         background-color: var(--color-bg-dark);
         color: #e5e5e5;
         overflow-x: hidden;
+        /* Safe area support for notched devices */
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
       }
       
       h1, h2, h3, .font-display {
@@ -95,6 +100,40 @@
         100% { opacity: 1; filter: blur(0); transform: translateY(0); }
       }
 
+      @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+      }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+
+      @keyframes glow {
+        0%, 100% { box-shadow: 0 0 5px rgba(185, 28, 28, 0.5); }
+        50% { box-shadow: 0 0 20px rgba(185, 28, 28, 0.8), 0 0 30px rgba(185, 28, 28, 0.4); }
+      }
+
+      .shimmer-effect {
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        background-size: 1000px 100%;
+        animation: shimmer 3s infinite;
+      }
+
+      .float-animation {
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .glow-animation {
+        animation: glow 2s ease-in-out infinite;
+      }
+
       /* Utilities */
       .glass-panel {
         background: rgba(10, 10, 10, 0.7);
@@ -131,6 +170,89 @@
         z-index: 50;
         opacity: 0.04;
         background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+
+      /* Touch optimization */
+      .touch-manipulation {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Safe area support */
+      .safe-area-inset-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+
+      /* Better text rendering on mobile */
+      @media (max-width: 640px) {
+        body {
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+      }
+
+      /* Prevent text size adjustment on iOS */
+      @supports (-webkit-touch-callout: none) {
+        input, textarea, select {
+          font-size: 16px !important;
+        }
+      }
+
+      /* Smooth page transitions */
+      * {
+        transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      /* Enhanced glass morphism */
+      .glass-panel {
+        background: rgba(10, 10, 10, 0.75);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      }
+
+      /* Gradient text animation */
+      @keyframes gradient-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      .gradient-text {
+        background: linear-gradient(-45deg, #dc2626, #991b1b, #7f1d1d, #dc2626);
+        background-size: 400% 400%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradient-shift 5s ease infinite;
+      }
+
+      /* Particle effect background */
+      .particle-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.1;
+      }
+
+      .particle-bg::before {
+        content: '';
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: rgba(220, 38, 38, 0.8);
+        border-radius: 50%;
+        animation: float 20s infinite;
+        box-shadow: 
+          20vw 20vh 0 0 rgba(220, 38, 38, 0.6),
+          40vw 40vh 0 0 rgba(220, 38, 38, 0.4),
+          60vw 60vh 0 0 rgba(220, 38, 38, 0.5),
+          80vw 80vh 0 0 rgba(220, 38, 38, 0.3);
       }
     </style>
   <script type="importmap">

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AppStep, GameState, StorySegment, THEMES } from './types';
 import { startNewStory, continueStory } from './services/geminiService';
 
@@ -125,324 +126,903 @@ const App: React.FC = () => {
   // --- SUB-COMPONENTS ---
 
   const renderSelectionCard = (label: string, value: string, current: string, onClick: (val: string) => void) => (
-    <button
+    <motion.button
+      whileHover={{ 
+        scale: 1.02,
+        y: -2
+      }}
+      whileTap={{ scale: 0.98 }}
       onClick={() => onClick(value)}
-      className={`relative p-3 md:p-5 rounded-xl border transition-all duration-500 flex flex-col items-center justify-center gap-2 group overflow-hidden ${
+      className={`relative w-full py-4 sm:py-5 rounded-lg border transition-all duration-300 flex items-center justify-center group overflow-hidden touch-manipulation min-h-[56px] sm:min-h-[60px] ${
         current === value 
-          ? 'bg-red-950/20 border-red-800 shadow-[0_0_20px_rgba(185,28,28,0.2)] scale-[1.02]' 
-          : 'bg-zinc-900/30 border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800/40'
+          ? 'bg-red-950/30 border-red-600/60 text-red-200 shadow-[0_0_20px_rgba(220,38,38,0.2)]' 
+          : 'bg-zinc-900/50 border-zinc-700/50 text-gray-400 hover:border-red-800/40 hover:text-gray-300 hover:bg-zinc-800/40'
       }`}
     >
-        {/* Glow effect */}
-        <div className={`absolute inset-0 bg-gradient-to-br from-red-600/10 to-transparent opacity-0 transition-opacity duration-700 ${current === value ? 'opacity-100' : 'group-hover:opacity-30'}`} />
-        
-        {/* Animated text */}
-        <span className={`relative font-ui text-[10px] md:text-sm tracking-[0.1em] md:tracking-[0.2em] uppercase z-10 transition-colors duration-300 ${current === value ? 'text-red-400 font-bold' : 'text-gray-400 group-hover:text-gray-200'}`}>
+      {/* Subtle background gradient when selected */}
+      {current === value && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 bg-gradient-to-r from-red-900/10 via-red-800/5 to-transparent"
+        />
+      )}
+      
+      {/* Text */}
+      <span className={`relative font-ui text-sm sm:text-base tracking-[0.15em] uppercase z-10 transition-all duration-300 ${
+        current === value ? 'font-semibold' : 'font-normal'
+      }`}>
           {label}
         </span>
         
-        {/* Active Indicator */}
+      {/* Active Indicator - clean dot */}
         {current === value && (
-            <div className="absolute bottom-1.5 md:bottom-2 w-1 h-1 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
-        )}
-    </button>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="absolute bottom-2 w-1.5 h-1.5 bg-red-500 rounded-full"
+        />
+      )}
+    </motion.button>
   );
+
+  // --- ANIMATION VARIANTS ---
+  const pageVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 }
+  };
+
+  const containerVariants = {
+    initial: { opacity: 0 },
+    animate: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 }
+  };
 
   // --- VIEWS ---
 
   if (step === AppStep.AGE_GATE) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-6 overflow-hidden bg-black">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key="age-gate"
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          variants={pageVariants}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 overflow-hidden bg-black"
+        >
         {/* Atmospheric Background */}
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542259681-d7031c5521eb?q=80&w=2069&auto=format&fit=crop')] bg-cover bg-center opacity-20 scale-105 animate-[pulseGlow_10s_infinite]"></div>
+          <motion.div
+            initial={{ scale: 1.05, opacity: 0 }}
+            animate={{ scale: 1.05, opacity: 0.2 }}
+            transition={{ duration: 2, ease: "easeInOut" }}
+            className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542259681-d7031c5521eb?q=80&w=2069&auto=format&fit=crop')] bg-cover bg-center"
+          ></motion.div>
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black/90 to-black"></div>
-        
-        <div className="relative z-10 max-w-lg w-full text-center p-6 md:p-10 slide-up border border-red-900/10 rounded-2xl backdrop-blur-sm">
-          <div className="mb-8 md:mb-10 flex justify-center">
-             <div className="w-16 h-16 md:w-20 md:h-20 border border-red-900/50 rounded-full flex items-center justify-center pulse-glow bg-black/50">
-                <span className="text-2xl md:text-3xl text-red-600 font-display">18+</span>
-             </div>
-          </div>
           
-          <h1 className="text-4xl md:text-7xl text-white mb-6 font-display font-bold tracking-tighter drop-shadow-2xl text-shadow-red leading-tight">
-            Fantasías <span className="text-red-700 italic font-serif block md:inline">Infinitas</span>
-          </h1>
-          
-          <p className="text-gray-400 mb-10 md:mb-12 text-base md:text-xl font-serif leading-relaxed px-2 md:px-4 opacity-80">
-            Una inmersión narrativa donde el deseo guía el camino. <br className="hidden md:block"/> Contenido explícito.
-          </p>
-          
-          <button 
-            onClick={handleAgeVerify}
-            className="group relative px-10 md:px-14 py-4 md:py-5 bg-transparent overflow-hidden rounded-sm transition-all hover:scale-105 duration-500 w-full md:w-auto"
+          <motion.div
+            variants={containerVariants}
+            initial="initial"
+            animate="animate"
+            className="relative z-10 max-w-lg w-full text-center p-5 sm:p-6 md:p-10 border border-red-900/10 rounded-2xl backdrop-blur-sm"
           >
-            <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-red-950/40 via-red-900/20 to-red-950/40 blur-md group-hover:bg-red-800/30 transition-all"></div>
-            <div className="absolute inset-0 border border-red-800/40 group-hover:border-red-500/60 transition-colors duration-500"></div>
-            <span className="relative text-red-100 font-display tracking-[0.3em] font-bold group-hover:text-white transition-colors flex items-center gap-3 justify-center text-sm md:text-base">
-              ENTRAR <IconFlame />
+            <motion.div
+              variants={itemVariants}
+              className="mb-6 sm:mb-8 md:mb-10 flex justify-center"
+            >
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 border border-red-900/50 rounded-full flex items-center justify-center pulse-glow bg-black/50"
+              >
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                  className="text-xl sm:text-2xl md:text-3xl text-red-600 font-display"
+                >
+                  18+
+                </motion.span>
+              </motion.div>
+            </motion.div>
+            
+            <motion.h1
+              variants={itemVariants}
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white mb-4 sm:mb-6 font-display font-bold tracking-tighter drop-shadow-2xl text-shadow-red leading-tight px-2"
+            >
+              Fantasías <motion.span
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-red-700 italic font-serif block sm:block md:inline mt-1 sm:mt-0"
+              >
+                Infinitas
+              </motion.span>
+            </motion.h1>
+            
+            <motion.p
+              variants={itemVariants}
+              className="text-gray-400 mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base md:text-xl font-serif leading-relaxed px-2 sm:px-3 md:px-4 opacity-80"
+            >
+              Una inmersión narrativa donde el deseo guía el camino. <br className="hidden sm:block"/> Contenido explícito.
+            </motion.p>
+            
+            <motion.button
+              variants={itemVariants}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            onClick={handleAgeVerify}
+              className="group relative px-8 sm:px-10 md:px-14 py-3.5 sm:py-4 md:py-5 bg-transparent overflow-hidden rounded-sm w-full sm:w-auto min-h-[48px] touch-manipulation"
+            >
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1 }}
+                className="absolute inset-0 w-full h-full bg-gradient-to-r from-red-950/40 via-red-900/20 to-red-950/40 blur-md"
+              ></motion.div>
+              <motion.div
+                whileHover={{ borderColor: "rgba(239, 68, 68, 0.6)" }}
+                className="absolute inset-0 border border-red-800/40 transition-colors duration-500"
+              ></motion.div>
+              <span className="relative text-red-100 font-display tracking-[0.2em] sm:tracking-[0.3em] font-bold flex items-center gap-2 sm:gap-3 justify-center text-xs sm:text-sm md:text-base">
+                ENTRAR <motion.span
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                >
+                  <IconFlame />
+                </motion.span>
             </span>
-          </button>
-        </div>
-      </div>
+            </motion.button>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
     );
   }
 
   if (step === AppStep.SETUP) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 md:p-8">
-        <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 slide-up">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key="setup"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="relative min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#050505] to-[#0a0a0a] flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-hidden"
+        >
+          {/* Animated Background Particles */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 bg-red-600/30 rounded-full"
+                initial={{
+                  x: Math.random() * window.innerWidth,
+                  y: Math.random() * window.innerHeight,
+                  opacity: 0
+                }}
+                animate={{
+                  y: [null, Math.random() * window.innerHeight],
+                  opacity: [0, 0.5, 0],
+                  scale: [0, 1, 0]
+                }}
+                transition={{
+                  duration: Math.random() * 3 + 2,
+                  repeat: Infinity,
+                  delay: Math.random() * 2,
+                  ease: "easeInOut"
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Animated Gradient Orbs */}
+          <motion.div
+            className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-900/20 rounded-full blur-3xl"
+            animate={{
+              x: [0, 50, 0],
+              y: [0, 30, 0],
+              scale: [1, 1.2, 1]
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+          <motion.div
+            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-red-800/15 rounded-full blur-3xl"
+            animate={{
+              x: [0, -50, 0],
+              y: [0, -30, 0],
+              scale: [1, 1.3, 1]
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1
+            }}
+          />
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-16 relative z-10"
+          >
             
             {/* Left Column: Atmospheric Side Panel (Top on Mobile) */}
-            <div className="lg:col-span-4 flex flex-col justify-center border-b border-red-900/20 pb-8 pl-0 text-center lg:text-left lg:border-b-0 lg:border-l-2 lg:border-red-900/20 lg:pl-8 relative lg:order-last">
-                 <div className="hidden lg:block absolute -left-[3px] top-1/3 bottom-1/3 w-1 bg-gradient-to-b from-transparent via-red-800 to-transparent blur-[2px]"></div>
-                <h2 className="text-4xl md:text-6xl text-white font-display mb-4 md:mb-6 leading-none">
-                   Diseña <br/> <span className="text-red-700 italic">Tu Deseo</span>
-                </h2>
-                <p className="text-gray-500 font-serif text-lg md:text-xl leading-relaxed">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="lg:col-span-4 flex flex-col justify-center border-b border-red-900/30 pb-8 sm:pb-10 pl-0 text-center lg:text-left lg:border-b-0 lg:border-l-2 lg:border-red-900/30 lg:pl-8 xl:pl-12 relative lg:order-last"
+            >
+              <motion.div
+                initial={{ opacity: 0, scaleY: 0 }}
+                animate={{ opacity: 1, scaleY: 1 }}
+                transition={{ delay: 0.8, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                className="hidden lg:block absolute -left-[3px] top-1/4 bottom-1/4 w-1 bg-gradient-to-b from-transparent via-red-600 to-transparent blur-[3px]"
+              />
+              
+              <motion.h2
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white font-display mb-4 sm:mb-6 md:mb-8 leading-tight px-2 sm:px-0"
+              >
+                <motion.span
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  Diseña
+                </motion.span>
+                <br/>
+                <motion.span
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="relative inline-block"
+                >
+                  <span className="text-red-600 italic font-serif relative z-10">Tu Deseo</span>
+                  <motion.span
+                    className="absolute inset-0 bg-red-600/20 blur-xl"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                </motion.span>
+              </motion.h2>
+              
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+                className="text-gray-400 font-serif text-lg sm:text-xl md:text-2xl leading-relaxed px-2 sm:px-0 italic"
+              >
                     "La anticipación es la forma más pura de placer. Cuéntame quién eres y déjame prepararte..."
-                </p>
-                <div className="mt-8 md:mt-12 opacity-30 text-red-500 animate-pulse flex justify-center lg:justify-start">
+              </motion.p>
+              
+              <motion.div
+                animate={{ 
+                  y: [0, -8, 0],
+                  rotate: [0, 5, -5, 0],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ 
+                  duration: 4, 
+                  repeat: Infinity, 
+                  ease: "easeInOut" 
+                }}
+                className="mt-8 sm:mt-10 md:mt-14 opacity-40 text-red-500 flex justify-center lg:justify-start"
+              >
                     <IconFeather />
-                </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Right Column: Interactive Form */}
-            <div className="lg:col-span-8 space-y-8 md:space-y-10">
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="lg:col-span-8 space-y-8 sm:space-y-10 md:space-y-12"
+            >
                 
                 {/* Name Input */}
-                <div className="space-y-4 group">
-                    <label className="text-xs font-ui uppercase tracking-[0.2em] text-red-900/70 group-hover:text-red-700 transition-colors">Nombre del Protagonista</label>
-                    <input 
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.6 }}
+                  className="space-y-4 sm:space-y-5 group"
+                >
+                    <motion.label
+                      animate={{
+                        color: gameState.playerName ? "#dc2626" : "#7f1d1d"
+                      }}
+                      className="text-xs sm:text-sm font-ui uppercase tracking-[0.3em] text-red-900/70 group-focus-within:text-red-600 transition-colors font-bold"
+                    >
+                      Nombre del Protagonista
+                    </motion.label>
+                    <motion.div
+                      className="relative"
+                      whileFocus={{ scale: 1.01 }}
+                    >
+                      <motion.input
                         type="text" 
                         value={gameState.playerName}
                         onChange={(e) => setGameState({...gameState, playerName: e.target.value})}
-                        className="w-full bg-transparent border-b border-zinc-800 py-3 md:py-4 text-2xl md:text-4xl text-white font-serif focus:border-red-800 focus:outline-none placeholder-zinc-800 transition-all focus:pl-4"
+                        className="w-full bg-transparent border-b-2 border-zinc-800/50 py-3 sm:py-4 md:py-5 text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white font-serif focus:border-red-600 focus:outline-none placeholder-zinc-700/50 transition-all focus:pl-3 sm:focus:pl-4 min-h-[56px] relative z-10"
                         placeholder="Escribe aquí..."
                     />
-                </div>
+                      <motion.div
+                        className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-red-600 via-red-500 to-red-600"
+                        initial={{ width: 0 }}
+                        animate={{ 
+                          width: gameState.playerName ? "100%" : "0%"
+                        }}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                      />
+                    </motion.div>
+                </motion.div>
 
                 {/* Identity & Orientation Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-                    <div className="space-y-3 md:space-y-4">
-                        <label className="text-xs font-ui uppercase tracking-[0.2em] text-zinc-600">Identidad</label>
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6, duration: 0.6 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12"
+                >
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.7 }}
+                      className="space-y-4 sm:space-y-5"
+                    >
+                        <motion.label
+                          animate={{ opacity: [0.6, 1, 0.6] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="text-xs sm:text-sm font-ui uppercase tracking-[0.3em] text-zinc-500 font-bold"
+                        >
+                          Identidad
+                        </motion.label>
                         {/* Mobile: Grid cols 3 for horizontal buttons */}
-                        <div className="grid grid-cols-3 md:grid-cols-1 gap-2 md:gap-3">
-                             {['Mujer', 'Hombre', 'No Binario'].map(g => 
-                                renderSelectionCard(g, g, gameState.gender, (v) => setGameState({...gameState, gender: v}))
-                             )}
+                        <div className="grid grid-cols-3 md:grid-cols-1 gap-3 sm:gap-4">
+                             {['Mujer', 'Hombre', 'No Binario'].map((g, idx) => (
+                                <motion.div
+                                  key={g}
+                                  initial={{ opacity: 0, scale: 0.5, rotateY: -90 }}
+                                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                                  transition={{ 
+                                    delay: 0.8 + idx * 0.15,
+                                    type: "spring",
+                                    stiffness: 200,
+                                    damping: 15
+                                  }}
+                                  whileHover={{ scale: 1.05, z: 10 }}
+                                >
+                                  {renderSelectionCard(g, g, gameState.gender, (v) => setGameState({...gameState, gender: v}))}
+                                </motion.div>
+                             ))}
                         </div>
-                    </div>
+                    </motion.div>
                     
-                    <div className="space-y-3 md:space-y-4">
-                        <label className="text-xs font-ui uppercase tracking-[0.2em] text-zinc-600">Interés</label>
-                        <div className="grid grid-cols-3 md:grid-cols-1 gap-2 md:gap-3">
-                            {['Hombres', 'Mujeres', 'Todo'].map(o => 
-                                renderSelectionCard(o, o, gameState.orientation, (v) => setGameState({...gameState, orientation: v}))
-                             )}
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.7 }}
+                      className="space-y-4 sm:space-y-5"
+                    >
+                        <motion.label
+                          animate={{ opacity: [0.6, 1, 0.6] }}
+                          transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                          className="text-xs sm:text-sm font-ui uppercase tracking-[0.3em] text-zinc-500 font-bold"
+                        >
+                          Interés
+                        </motion.label>
+                        <div className="grid grid-cols-3 md:grid-cols-1 gap-3 sm:gap-4">
+                            {['Hombres', 'Mujeres', 'Todo'].map((o, idx) => (
+                                <motion.div
+                                  key={o}
+                                  initial={{ opacity: 0, scale: 0.5, rotateY: 90 }}
+                                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                                  transition={{ 
+                                    delay: 0.9 + idx * 0.15,
+                                    type: "spring",
+                                    stiffness: 200,
+                                    damping: 15
+                                  }}
+                                  whileHover={{ scale: 1.05, z: 10 }}
+                                >
+                                  {renderSelectionCard(o, o, gameState.orientation, (v) => setGameState({...gameState, orientation: v}))}
+                                </motion.div>
+                             ))}
                         </div>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
 
                 {/* Theme Selection */}
-                <div className="space-y-3 md:space-y-4">
-                     <label className="text-xs font-ui uppercase tracking-[0.2em] text-zinc-600">Fantasía Inicial</label>
-                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                        {THEMES.map(theme => (
-                            <button
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8, duration: 0.6 }}
+                  className="space-y-4 sm:space-y-5"
+                >
+                     <motion.label
+                       animate={{ opacity: [0.6, 1, 0.6] }}
+                       transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                       className="text-xs sm:text-sm font-ui uppercase tracking-[0.3em] text-zinc-500 font-bold"
+                     >
+                       Fantasía Inicial
+                     </motion.label>
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
+                        {THEMES.map((theme, idx) => (
+                            <motion.button
                                 key={theme}
+                              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              transition={{ 
+                                delay: 0.9 + idx * 0.1,
+                                type: "spring",
+                                stiffness: 150,
+                                damping: 12
+                              }}
+                              whileHover={{ 
+                                scale: 1.05, 
+                                y: -4,
+                                transition: { duration: 0.2 }
+                              }}
+                              whileTap={{ scale: 0.95 }}
                                 onClick={() => setGameState({...gameState, theme})}
-                                className={`text-left p-4 md:p-5 rounded-lg border transition-all duration-300 relative overflow-hidden group ${
+                              className={`text-left p-4 sm:p-5 md:p-6 rounded-xl border-2 transition-all duration-500 relative overflow-hidden group touch-manipulation min-h-[56px] sm:min-h-[64px] ${
                                     gameState.theme === theme
-                                    ? 'bg-zinc-900 border-red-800 text-red-100'
-                                    : 'bg-transparent border-zinc-800 text-gray-500 hover:border-zinc-700 hover:text-gray-300'
-                                }`}
+                                  ? 'bg-gradient-to-br from-red-950/40 to-red-900/20 border-red-600 text-red-100 shadow-[0_0_30px_rgba(220,38,38,0.3)]'
+                                  : 'bg-zinc-900/20 border-zinc-700/50 text-gray-400 hover:border-red-800/50 hover:text-gray-200 hover:bg-zinc-800/30'
+                              }`}
                             >
-                                <div className={`absolute inset-0 bg-gradient-to-r from-red-900/10 to-transparent transition-opacity duration-500 ${gameState.theme === theme ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}></div>
-                                <span className="font-serif text-base md:text-lg block relative z-10">{theme}</span>
-                            </button>
+                                <motion.div
+                                  animate={gameState.theme === theme ? { 
+                                    opacity: 1,
+                                    scale: 1.1
+                                  } : { 
+                                    opacity: 0,
+                                    scale: 1
+                                  }}
+                                  transition={{ duration: 0.4 }}
+                                  className="absolute inset-0 bg-gradient-to-br from-red-600/20 via-red-700/10 to-transparent"
+                                />
+                                <motion.div
+                                  animate={gameState.theme === theme ? {
+                                    boxShadow: "0 0 20px rgba(220, 38, 38, 0.4)"
+                                  } : {}}
+                                  className="absolute inset-0 rounded-xl"
+                                />
+                                <motion.span
+                                  animate={gameState.theme === theme ? {
+                                    color: "#fca5a5",
+                                    fontWeight: 600
+                                  } : {}}
+                                  className="font-serif text-base sm:text-lg md:text-xl block relative z-10 transition-all"
+                                >
+                                  {theme}
+                                </motion.span>
+                                {gameState.theme === theme && (
+                                  <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"
+                                  />
+                                )}
+                            </motion.button>
                         ))}
                      </div>
-                </div>
+                </motion.div>
 
                 {/* Start Button */}
-                <div className="pt-4 md:pt-8 pb-4">
-                    <button 
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.2, duration: 0.6 }}
+                  className="pt-6 sm:pt-8 md:pt-10 pb-4"
+                >
+                    <motion.button
+                      whileHover={{ 
+                        scale: 1.03,
+                        boxShadow: "0 10px 40px rgba(220, 38, 38, 0.4)"
+                      }}
+                      whileTap={{ scale: 0.97 }}
                         onClick={handleStartGame}
                         disabled={!gameState.playerName || gameState.isLoading}
-                        className={`w-full py-5 md:py-6 rounded-sm font-display font-bold tracking-[0.2em] md:tracking-[0.3em] text-base md:text-lg transition-all relative overflow-hidden group ${
+                      className={`w-full py-5 sm:py-6 md:py-7 rounded-lg font-display font-bold tracking-[0.2em] sm:tracking-[0.25em] md:tracking-[0.3em] text-base sm:text-lg md:text-xl transition-all relative overflow-hidden group min-h-[60px] sm:min-h-[64px] touch-manipulation ${
                             gameState.isLoading 
                             ? 'bg-zinc-900 text-zinc-600 cursor-not-allowed' 
-                            : 'bg-white text-black hover:bg-zinc-200'
-                        }`}
+                          : gameState.playerName
+                          ? 'bg-gradient-to-r from-white via-zinc-100 to-white text-black shadow-[0_0_30px_rgba(255,255,255,0.3)]'
+                          : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+                      }`}
                     >
+                        <motion.div
+                          animate={gameState.playerName && !gameState.isLoading ? {
+                            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
+                          } : {}}
+                          transition={{ duration: 3, repeat: Infinity }}
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                          style={{ backgroundSize: "200% 100%" }}
+                        />
                         {gameState.isLoading ? (
-                            <span className="animate-pulse flex items-center justify-center gap-3">
-                                <IconSparkles /> SEDUCIENDO A LA IA...
-                            </span>
+                            <motion.span
+                              animate={{ opacity: [1, 0.6, 1] }}
+                              transition={{ duration: 1.5, repeat: Infinity }}
+                              className="flex items-center justify-center gap-3 sm:gap-4 text-sm sm:text-base md:text-lg relative z-10"
+                            >
+                                <motion.span
+                                  animate={{ rotate: 360 }}
+                                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                >
+                                  <IconSparkles className="w-5 h-5 sm:w-6 sm:h-6" />
+                                </motion.span>
+                                <span className="hidden sm:inline">SEDUCIENDO A LA IA...</span>
+                                <span className="sm:hidden">CARGANDO...</span>
+                            </motion.span>
                         ) : (
-                            <span className="flex items-center justify-center gap-3">
-                                COMENZAR EXPERIENCIA <span className="opacity-0 group-hover:opacity-100 transition-opacity -ml-4 group-hover:ml-0">→</span>
-                            </span>
+                            <motion.span
+                              animate={gameState.playerName ? {
+                                scale: [1, 1.02, 1]
+                              } : {}}
+                              transition={{ duration: 2, repeat: Infinity }}
+                              className="flex items-center justify-center gap-3 sm:gap-4 relative z-10"
+                            >
+                                <span className="text-sm sm:text-base md:text-lg">COMENZAR EXPERIENCIA</span>
+                                <motion.span
+                                  animate={gameState.playerName ? {
+                                    x: [0, 5, 0],
+                                    opacity: [0.7, 1, 0.7]
+                                  } : {}}
+                                  transition={{ duration: 1.5, repeat: Infinity }}
+                                  className="text-xl sm:text-2xl"
+                                >
+                                  →
+                                </motion.span>
+                            </motion.span>
                         )}
-                        <div className="absolute bottom-0 left-0 h-[2px] bg-red-600 w-0 group-hover:w-full transition-all duration-700 ease-in-out"></div>
-                    </button>
-                </div>
-            </div>
-        </div>
-      </div>
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={gameState.playerName && !gameState.isLoading ? {
+                            width: "100%"
+                          } : {
+                            width: 0
+                          }}
+                          transition={{ duration: 0.8, ease: "easeInOut" }}
+                          className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-red-600 via-red-500 to-red-600"
+                        />
+                    </motion.button>
+                </motion.div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
     );
   }
 
   // --- PLAYING MODE ---
   return (
-    <div className="min-h-screen bg-[#050505] text-[#d4d4d4] flex flex-col font-serif relative">
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="playing"
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={pageVariants}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="min-h-screen bg-[#050505] text-[#d4d4d4] flex flex-col font-serif relative"
+      >
       
       {/* Header */}
-      <header className="fixed top-0 w-full z-40 glass-panel transition-all duration-500">
-        <div className="max-w-4xl mx-auto px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
+      <motion.header
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed top-0 w-full z-40 glass-panel"
+      >
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
           <div className="flex flex-col cursor-default">
-            <h1 className="text-lg md:text-xl text-red-700 font-display font-bold tracking-widest leading-none drop-shadow-sm">FANTASÍAS</h1>
-            <span className="text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-[0.4em] ml-0.5 opacity-80">Infinitas</span>
+            <h1 className="text-base sm:text-lg md:text-xl text-red-700 font-display font-bold tracking-widest leading-none drop-shadow-sm">FANTASÍAS</h1>
+            <span className="text-[7px] sm:text-[8px] md:text-[9px] text-zinc-500 uppercase tracking-[0.4em] ml-0.5 opacity-80">Infinitas</span>
           </div>
-          <button onClick={resetGame} className="text-[10px] font-ui text-zinc-600 hover:text-red-500 tracking-[0.2em] uppercase transition-colors border border-transparent hover:border-red-900/30 px-3 py-1 rounded-sm">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={resetGame}
+            className="text-[9px] sm:text-[10px] font-ui text-zinc-600 hover:text-red-500 active:text-red-400 tracking-[0.2em] uppercase transition-colors border border-transparent hover:border-red-900/30 active:border-red-900/50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm min-h-[36px] touch-manipulation"
+          >
             Terminar
-          </button>
+          </motion.button>
         </div>
-      </header>
+      </motion.header>
 
       {/* Main Story Container */}
-      <main className="flex-1 w-full max-w-3xl mx-auto pt-24 md:pt-32 px-5 md:px-12 relative z-10">
-        <div className="space-y-12 md:space-y-16">
+      <main className="flex-1 w-full max-w-3xl mx-auto pt-20 sm:pt-24 md:pt-32 px-4 sm:px-6 md:px-12 relative z-10 pb-4">
+        <div className="space-y-8 sm:space-y-12 md:space-y-16">
             
             {/* Story History */}
+            <AnimatePresence>
             {gameState.history.map((entry, idx) => {
                 const isModel = entry.role === 'model';
                 const isLast = idx === gameState.history.length - 1;
                 
                 return (
-                    <div key={idx} className={`flex flex-col ${isModel ? 'items-start' : 'items-end'}`}>
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{
+                      duration: 0.6,
+                      ease: [0.16, 1, 0.3, 1],
+                      delay: isLast ? 0.2 : 0
+                    }}
+                    className={`flex flex-col ${isModel ? 'items-start' : 'items-end'}`}
+                  >
                         {isModel ? (
-                            <div className={`w-full ${isLast ? 'text-reveal' : 'fade-in'}`}>
+                      <motion.div
+                        initial={{ opacity: 0, filter: "blur(10px)" }}
+                        animate={{ opacity: 1, filter: "blur(0px)" }}
+                        transition={{ duration: 1, delay: isLast ? 0.3 : 0 }}
+                        className="w-full"
+                      >
                                 <div className="prose prose-invert max-w-none">
-                                    <p className="text-lg md:text-2xl leading-8 md:leading-9 text-gray-200 font-serif antialiased first-letter:text-4xl md:first-letter:text-5xl first-letter:font-display first-letter:text-red-700 first-letter:float-left first-letter:mr-3 first-letter:mt-[-4px] md:first-letter:mt-[-6px]">
+                          <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.8, delay: isLast ? 0.5 : 0 }}
+                            className="text-base sm:text-lg md:text-2xl leading-7 sm:leading-8 md:leading-9 text-gray-200 font-serif antialiased first-letter:text-3xl sm:first-letter:text-4xl md:first-letter:text-5xl first-letter:font-display first-letter:text-red-700 first-letter:float-left first-letter:mr-2 sm:first-letter:mr-3 first-letter:mt-[-2px] sm:first-letter:mt-[-4px] md:first-letter:mt-[-6px]"
+                          >
                                         {entry.text}
-                                    </p>
+                          </motion.p>
                                 </div>
                                 {/* Elegant Divider */}
                                 {idx < gameState.history.length - 1 && (
-                                    <div className="w-full flex justify-center mt-12 md:mt-16 mb-4 opacity-30">
+                          <motion.div
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                            className="w-full flex justify-center mt-12 md:mt-16 mb-4 opacity-30"
+                          >
                                         <div className="h-px w-20 md:w-32 bg-gradient-to-r from-transparent via-red-800 to-transparent"></div>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="mt-2 mb-8 md:mb-10 max-w-[90%] md:max-w-[85%] fade-in">
-                                <div className="text-right border-r border-red-800 pr-4 md:pr-6 py-2 bg-gradient-to-l from-red-950/10 to-transparent">
-                                    <p className="text-red-200/90 italic text-base md:text-xl font-serif">
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0, x: isModel ? -20 : 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="mt-2 mb-6 sm:mb-8 md:mb-10 max-w-[92%] sm:max-w-[90%] md:max-w-[85%]"
+                      >
+                        <div className="text-right border-r border-red-800 pr-3 sm:pr-4 md:pr-6 py-2 bg-gradient-to-l from-red-950/10 to-transparent">
+                          <p className="text-red-200/90 italic text-sm sm:text-base md:text-xl font-serif">
                                         "{entry.text}"
                                     </p>
                                 </div>
-                            </div>
+                      </motion.div>
                         )}
-                    </div>
+                  </motion.div>
                 );
             })}
+            </AnimatePresence>
 
             {/* Loading State */}
+            <AnimatePresence>
             {gameState.isLoading && (
-                <div className="flex justify-center py-8 md:py-12 fade-in">
-                     <div className="flex flex-col items-center gap-4">
-                        <div className="animate-spin text-red-800 opacity-50"><IconSparkles /></div>
-                        <span className="text-[10px] font-ui uppercase tracking-[0.3em] text-zinc-600 animate-pulse">Escribiendo el deseo...</span>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="flex justify-center py-6 sm:py-8 md:py-12"
+                >
+                  <div className="flex flex-col items-center gap-3 sm:gap-4">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="text-red-800 opacity-50 w-6 h-6 sm:w-8 sm:h-8"
+                    >
+                      <IconSparkles />
+                    </motion.div>
+                    <motion.span
+                      animate={{ opacity: [1, 0.5, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      className="text-[9px] sm:text-[10px] font-ui uppercase tracking-[0.3em] text-zinc-600 text-center px-4"
+                    >
+                      Escribiendo el deseo...
+                    </motion.span>
                      </div>
-                </div>
+                </motion.div>
             )}
+            </AnimatePresence>
 
             {/* Error State */}
+            <AnimatePresence>
             {gameState.error && (
-                <div className="bg-red-950/10 border border-red-900/30 p-6 md:p-8 rounded text-center backdrop-blur-sm fade-in">
-                    <p className="text-red-400 mb-6 font-serif italic text-base md:text-lg">{gameState.error}</p>
-                    <button 
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  className="bg-red-950/10 border border-red-900/30 p-4 sm:p-6 md:p-8 rounded text-center backdrop-blur-sm"
+                >
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-red-400 mb-4 sm:mb-6 font-serif italic text-sm sm:text-base md:text-lg px-2"
+                  >
+                    {gameState.error}
+                  </motion.p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                         onClick={() => setGameState(p => ({...p, isLoading: false, error: null}))} 
-                        className="text-xs font-ui bg-red-900 text-red-100 px-6 md:px-8 py-3 rounded-sm uppercase tracking-widest hover:bg-red-800 transition-colors shadow-lg shadow-red-900/20"
+                    className="text-[10px] sm:text-xs font-ui bg-red-900 text-red-100 px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-sm uppercase tracking-widest hover:bg-red-800 active:bg-red-700 transition-colors shadow-lg shadow-red-900/20 min-h-[44px] touch-manipulation"
                     >
                         Intentar de Nuevo
-                    </button>
-                </div>
+                  </motion.button>
+                </motion.div>
             )}
+            </AnimatePresence>
 
              {/* Game Over */}
+            <AnimatePresence>
             {(gameState.currentSegment?.isEnding || step === AppStep.GAME_OVER) && !gameState.isLoading && (
-                 <div className="text-center py-12 md:py-16 slide-up border-t border-zinc-900 mt-8 md:mt-12">
-                    <div className="inline-block p-4 border border-red-900/40 rounded-full mb-6 md:mb-8 bg-red-950/20 shadow-[0_0_30px_rgba(127,29,29,0.2)]">
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -50 }}
+                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-center py-8 sm:py-12 md:py-16 border-t border-zinc-900 mt-6 sm:mt-8 md:mt-12"
+                >
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className="inline-block p-3 sm:p-4 border border-red-900/40 rounded-full mb-4 sm:mb-6 md:mb-8 bg-red-950/20 shadow-[0_0_30px_rgba(127,29,29,0.2)]"
+                  >
                         <IconHeart />
-                    </div>
-                    <h3 className="text-3xl md:text-4xl font-display text-white mb-4">Fin de la Escena</h3>
-                    <p className="text-gray-500 font-serif italic text-lg md:text-xl mb-8 md:mb-10">La fantasía ha llegado a su clímax.</p>
-                    <button 
+                  </motion.div>
+                  <motion.h3
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-2xl sm:text-3xl md:text-4xl font-display text-white mb-3 sm:mb-4 px-4"
+                  >
+                    Fin de la Escena
+                  </motion.h3>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-gray-500 font-serif italic text-base sm:text-lg md:text-xl mb-6 sm:mb-8 md:mb-10 px-4"
+                  >
+                    La fantasía ha llegado a su clímax.
+                  </motion.p>
+                  <motion.button
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
                         onClick={resetGame}
-                        className="bg-zinc-100 text-black font-display font-bold text-xs md:text-sm py-3 md:py-4 px-8 md:px-12 tracking-[0.25em] hover:bg-white hover:scale-105 transition-all shadow-lg hover:shadow-white/20"
+                    className="bg-zinc-100 text-black font-display font-bold text-[10px] sm:text-xs md:text-sm py-3 sm:py-3 md:py-4 px-6 sm:px-8 md:px-12 tracking-[0.25em] hover:bg-white active:bg-zinc-200 transition-all shadow-lg hover:shadow-white/20 min-h-[44px] touch-manipulation"
                     >
                         NUEVA HISTORIA
-                    </button>
-                </div>
+                  </motion.button>
+                </motion.div>
             )}
+            </AnimatePresence>
             
             {/* Massive Spacer to ensure text is never hidden behind the fixed footer */}
-            <div ref={endRef} className="h-[45vh] w-full pointer-events-none" />
+            <div ref={endRef} className="h-[50vh] sm:h-[45vh] w-full pointer-events-none" />
         </div>
       </main>
 
       {/* Footer Choices Area */}
+      <AnimatePresence>
       {!gameState.isLoading && gameState.currentSegment && !gameState.currentSegment.isEnding && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none"
+          >
             {/* Gradient Mask for smooth fade */}
-            <div className="h-16 md:h-32 bg-gradient-to-t from-[#050505] via-[#050505]/95 to-transparent"></div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="h-20 sm:h-24 md:h-32 bg-gradient-to-t from-[#050505] via-[#050505]/95 to-transparent"
+            ></motion.div>
             
             {/* Control Panel */}
-            <div className="bg-[#050505] border-t border-zinc-900/50 pb-6 pt-4 px-4 md:px-6 md:pb-8 md:pt-6 pointer-events-auto">
-                <div className="max-w-3xl mx-auto slide-up-delay">
-                    <div className="flex items-center justify-center gap-4 mb-3 md:mb-5 opacity-40">
+            <div className="bg-[#050505] border-t border-zinc-900/50 pb-4 sm:pb-6 md:pb-8 pt-3 sm:pt-4 md:pt-6 px-3 sm:px-4 md:px-6 pointer-events-auto safe-area-inset-bottom">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="max-w-3xl mx-auto"
+                >
+                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-3 md:mb-5 opacity-40">
                          <div className="h-px bg-zinc-800 flex-1"></div>
-                         <span className="text-[9px] md:text-[10px] font-ui uppercase tracking-[0.3em] text-zinc-500">Elige tu destino</span>
+                         <span className="text-[8px] sm:text-[9px] md:text-[10px] font-ui uppercase tracking-[0.3em] text-zinc-500">Elige tu destino</span>
                          <div className="h-px bg-zinc-800 flex-1"></div>
                     </div>
                     
-                    <div className="flex flex-col gap-2 md:gap-3">
+                    <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3">
+                        <AnimatePresence>
                         {gameState.currentSegment.choices.map((choice, idx) => (
-                            <button
+                            <motion.button
                                 key={idx}
+                              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                              transition={{
+                                duration: 0.4,
+                                delay: idx * 0.1,
+                                ease: [0.16, 1, 0.3, 1]
+                              }}
+                              whileHover={{ scale: 1.02, y: -2 }}
+                              whileTap={{ scale: 0.98 }}
                                 onClick={() => handleChoice(choice.text)}
-                                className="group relative w-full text-left overflow-hidden transition-all duration-500 transform active:scale-95 md:hover:scale-[1.01] md:hover:-translate-y-1"
+                              className="group relative w-full text-left overflow-hidden touch-manipulation min-h-[56px] sm:min-h-[60px]"
                             >
                                 {/* Card Background */}
-                                <div className="absolute inset-0 bg-zinc-900/40 border border-zinc-800/60 transition-all duration-500 group-hover:border-red-900/60 group-hover:bg-red-950/20 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)]"></div>
+                                <div className="absolute inset-0 bg-zinc-900/40 border border-zinc-800/60 transition-all duration-500 group-active:border-red-900/60 group-active:bg-red-950/20 md:group-hover:border-red-900/60 md:group-hover:bg-red-950/20 md:group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)]"></div>
                                 
                                 {/* Content */}
-                                <div className="relative p-3 md:p-6 flex items-center justify-between z-10">
-                                    <span className="font-serif text-base md:text-xl text-gray-300 md:text-gray-400 group-hover:text-gray-100 transition-colors duration-300 group-hover:drop-shadow-sm pr-2">
+                                <div className="relative p-3 sm:p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 z-10">
+                                    <span className="font-serif text-sm sm:text-base md:text-xl text-gray-300 md:text-gray-400 group-active:text-gray-100 md:group-hover:text-gray-100 transition-colors duration-300 group-active:drop-shadow-sm md:group-hover:drop-shadow-sm pr-2 flex-1">
                                         {choice.text}
                                     </span>
                                     <span className={`
-                                        ml-2 md:ml-4 text-[8px] md:text-[9px] font-ui uppercase tracking-[0.2em] px-2 py-1 md:px-3 md:py-1.5 rounded-sm border transition-all duration-300 whitespace-nowrap
-                                        ${choice.tone.toLowerCase().includes('aggressive') || choice.tone.toLowerCase().includes('brusco') ? 'border-red-900/30 text-red-500/70 group-hover:bg-red-900/20' : 
-                                          choice.tone.toLowerCase().includes('romantic') ? 'border-purple-900/30 text-purple-400/70 group-hover:bg-purple-900/20' :
-                                          'border-zinc-800 text-zinc-500 group-hover:border-zinc-600'}
+                                        text-[7px] sm:text-[8px] md:text-[9px] font-ui uppercase tracking-[0.2em] px-2 py-1 sm:px-2.5 sm:py-1 md:px-3 md:py-1.5 rounded-sm border transition-all duration-300 whitespace-nowrap self-start sm:self-auto
+                                        ${choice.tone.toLowerCase().includes('aggressive') || choice.tone.toLowerCase().includes('brusco') ? 'border-red-900/30 text-red-500/70 group-active:bg-red-900/20 md:group-hover:bg-red-900/20' : 
+                                          choice.tone.toLowerCase().includes('romantic') ? 'border-purple-900/30 text-purple-400/70 group-active:bg-purple-900/20 md:group-hover:bg-purple-900/20' :
+                                          'border-zinc-800 text-zinc-500 group-active:border-zinc-600 md:group-hover:border-zinc-600'}
                                     `}>
                                         {choice.tone}
                                     </span>
                                 </div>
                                 
-                                {/* Hover Glow Line */}
-                                <div className="absolute bottom-0 left-0 w-0 h-[1px] bg-red-600 group-hover:w-full transition-all duration-700"></div>
-                            </button>
-                        ))}
+                                {/* Active/Hover Glow Line */}
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  whileHover={{ width: "100%" }}
+                                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                                  className="absolute bottom-0 left-0 h-[1px] bg-red-600"
+                                ></motion.div>
+                            </motion.button>
+                          ))}
+                        </AnimatePresence>
                     </div>
-                </div>
+                </motion.div>
             </div>
-        </div>
+          </motion.div>
       )}
-    </div>
+      </AnimatePresence>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
