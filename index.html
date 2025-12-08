@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fantasías Infinitas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&display=swap');
+      
+      :root {
+        --color-bg-dark: #050505;
+        --color-accent-red: #7f1d1d;
+        --color-accent-red-glow: rgba(127, 29, 29, 0.4);
+        --color-accent-gold: #b49b67;
+      }
+
+      body {
+        font-family: 'Crimson Text', serif;
+        background-color: var(--color-bg-dark);
+        color: #e5e5e5;
+        overflow-x: hidden;
+      }
+      
+      h1, h2, h3, .font-display {
+        font-family: 'Cinzel', serif;
+      }
+
+      .font-ui {
+        font-family: 'Lato', sans-serif;
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #000; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #262626; 
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #404040; 
+      }
+      
+      /* Animations */
+      .fade-in {
+        animation: fadeIn 1s ease-out forwards;
+      }
+
+      .fade-in-delayed {
+        opacity: 0;
+        animation: fadeIn 1s ease-out 0.5s forwards;
+      }
+      
+      .slide-up {
+        animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      .slide-up-delay {
+         animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+         opacity: 0;
+         transform: translateY(30px);
+      }
+
+      .pulse-glow {
+        animation: pulseGlow 4s infinite ease-in-out;
+      }
+
+      .text-reveal {
+        animation: revealText 1.5s ease-out forwards;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes slideUp {
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes pulseGlow {
+        0% { box-shadow: 0 0 10px rgba(127, 29, 29, 0.1); }
+        50% { box-shadow: 0 0 25px rgba(127, 29, 29, 0.5); }
+        100% { box-shadow: 0 0 10px rgba(127, 29, 29, 0.1); }
+      }
+
+      @keyframes revealText {
+        0% { opacity: 0; filter: blur(8px); transform: translateY(5px); }
+        100% { opacity: 1; filter: blur(0); transform: translateY(0); }
+      }
+
+      /* Utilities */
+      .glass-panel {
+        background: rgba(10, 10, 10, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .glass-card {
+        background: linear-gradient(180deg, rgba(30, 30, 30, 0.4) 0%, rgba(10, 10, 10, 0.6) 100%);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      }
+
+      .gold-gradient {
+        background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      
+      .text-shadow-red {
+        text-shadow: 0 0 20px rgba(185, 28, 28, 0.5);
+      }
+
+      /* Noise Texture */
+      .noise-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 50;
+        opacity: 0.04;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <div class="noise-bg"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
