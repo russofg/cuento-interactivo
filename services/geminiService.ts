@@ -1,10 +1,12 @@
 import { GoogleGenAI, Type, Schema, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import { StorySegment } from '../types';
 
-const apiKey = process.env.API_KEY;
+// En Vite, las variables de entorno del cliente deben empezar con VITE_ y usarse con import.meta.env
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 if (!apiKey) {
-  console.error("API_KEY is missing from environment variables.");
+  console.error("VITE_GEMINI_API_KEY is missing from environment variables.");
+  console.error("Por favor, crea un archivo .env en la raíz del proyecto con: VITE_GEMINI_API_KEY=tu_api_key_aqui");
 }
 
 const ai = new GoogleGenAI({ apiKey: apiKey || 'dummy-key' });
