@@ -4,6 +4,9 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  # Omitir VITE_GEMINI_API_KEY del escaneo de secretos
+  # Es necesario porque esta app frontend llama directamente a la API de Gemini
+  SECRETS_SCAN_OMIT_KEYS = "VITE_GEMINI_API_KEY"
 
 [[redirects]]
   from = "/*"
