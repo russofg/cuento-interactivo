@@ -5,8 +5,19 @@ import { StorySegment } from '../types';
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 if (!apiKey) {
-  console.error("VITE_GEMINI_API_KEY is missing from environment variables.");
-  console.error("Por favor, crea un archivo .env en la raíz del proyecto con: VITE_GEMINI_API_KEY=tu_api_key_aqui");
+  console.error("❌ VITE_GEMINI_API_KEY is missing from environment variables.");
+  console.error("🔍 Debug info:");
+  console.error("  - import.meta.env keys:", Object.keys(import.meta.env));
+  console.error("  - import.meta.env.MODE:", import.meta.env.MODE);
+  console.error("  - import.meta.env.PROD:", import.meta.env.PROD);
+  console.error("");
+  console.error("📝 Para desarrollo local:");
+  console.error("  Crea un archivo .env en la raíz con: VITE_GEMINI_API_KEY=tu_api_key_aqui");
+  console.error("");
+  console.error("🌐 Para Netlify:");
+  console.error("  1. Ve a Site settings → Environment variables");
+  console.error("  2. Agrega variable: Key = VITE_GEMINI_API_KEY, Value = tu_api_key");
+  console.error("  3. IMPORTANTE: Haz un nuevo deploy después de agregar la variable");
 }
 
 const ai = new GoogleGenAI({ apiKey: apiKey || 'dummy-key' });
